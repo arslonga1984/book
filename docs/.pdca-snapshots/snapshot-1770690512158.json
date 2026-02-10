@@ -1,0 +1,557 @@
+{
+  "timestamp": "2026-02-10T02:28:32.156Z",
+  "reason": "compaction",
+  "status": {
+    "version": "2.0",
+    "lastUpdated": "2026-02-10T01:55:50.129Z",
+    "activeFeatures": [
+      "packages",
+      "prisma",
+      "api",
+      "db",
+      "routes",
+      "jobs",
+      "scrapers",
+      "mobile",
+      "navigation",
+      "screens",
+      "stores",
+      "i18n",
+      "book_ranking",
+      "test"
+    ],
+    "primaryFeature": "packages",
+    "features": {
+      "packages": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-09T05:40:10.881Z",
+          "lastUpdated": "2026-02-10T01:18:06.078Z"
+        },
+        "lastFile": "C:\\Users\\ecoto\\book_ranking\\packages\\shared\\src\\types\\book.test.ts"
+      },
+      "prisma": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-09T05:41:42.767Z",
+          "lastUpdated": "2026-02-09T06:05:33.538Z"
+        },
+        "lastFile": "C:\\Users\\ecoto\\book_ranking\\apps\\api\\prisma\\seed.ts"
+      },
+      "api": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-09T05:41:56.047Z",
+          "lastUpdated": "2026-02-10T01:16:53.683Z"
+        },
+        "lastFile": "C:\\Users\\ecoto\\book_ranking\\apps\\api\\vitest.config.ts"
+      },
+      "db": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-09T05:42:01.675Z",
+          "lastUpdated": "2026-02-09T05:42:01.675Z"
+        },
+        "lastFile": "C:\\Users\\ecoto\\book_ranking\\apps\\api\\src\\db\\prisma.ts"
+      },
+      "routes": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-09T05:42:11.369Z",
+          "lastUpdated": "2026-02-10T01:19:06.900Z"
+        },
+        "lastFile": "C:\\Users\\ecoto\\book_ranking\\apps\\api\\src\\routes\\authors.test.ts"
+      },
+      "jobs": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-09T05:42:59.676Z",
+          "lastUpdated": "2026-02-09T05:42:59.676Z"
+        },
+        "lastFile": "C:\\Users\\ecoto\\book_ranking\\apps\\api\\src\\jobs\\scheduler.ts"
+      },
+      "scrapers": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-09T05:43:14.163Z",
+          "lastUpdated": "2026-02-10T01:19:55.682Z"
+        },
+        "lastFile": "C:\\Users\\ecoto\\book_ranking\\apps\\api\\src\\scrapers\\dangdang.test.ts"
+      },
+      "mobile": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-09T05:44:24.378Z",
+          "lastUpdated": "2026-02-10T01:55:50.129Z"
+        },
+        "lastFile": "C:\\Users\\ecoto\\book_ranking\\apps\\mobile\\src\\App.tsx"
+      },
+      "navigation": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-09T05:46:08.480Z",
+          "lastUpdated": "2026-02-09T05:46:08.480Z"
+        },
+        "lastFile": "C:\\Users\\ecoto\\book_ranking\\apps\\mobile\\src\\navigation\\RootNavigator.tsx"
+      },
+      "screens": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-09T05:46:19.616Z",
+          "lastUpdated": "2026-02-09T05:47:02.704Z"
+        },
+        "lastFile": "C:\\Users\\ecoto\\book_ranking\\apps\\mobile\\src\\screens\\SettingsScreen.tsx"
+      },
+      "stores": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-09T05:47:35.344Z",
+          "lastUpdated": "2026-02-09T05:47:37.523Z"
+        },
+        "lastFile": "C:\\Users\\ecoto\\book_ranking\\apps\\mobile\\src\\stores\\settingsStore.ts"
+      },
+      "i18n": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-09T05:47:45.373Z",
+          "lastUpdated": "2026-02-09T05:47:45.373Z"
+        },
+        "lastFile": "C:\\Users\\ecoto\\book_ranking\\apps\\mobile\\src\\i18n\\index.ts"
+      },
+      "book_ranking": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-10T01:16:28.408Z",
+          "lastUpdated": "2026-02-10T01:16:28.408Z"
+        },
+        "lastFile": "C:\\Users\\ecoto\\book_ranking\\vitest.config.ts"
+      },
+      "test": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-10T01:17:26.686Z",
+          "lastUpdated": "2026-02-10T01:17:28.835Z"
+        },
+        "lastFile": "C:\\Users\\ecoto\\book_ranking\\apps\\api\\src\\test\\helpers.ts"
+      }
+    },
+    "pipeline": {
+      "currentPhase": 1,
+      "level": "Dynamic",
+      "phaseHistory": []
+    },
+    "session": {
+      "startedAt": "2026-02-09T05:26:50.784Z",
+      "onboardingCompleted": false,
+      "lastActivity": "2026-02-10T01:55:50.129Z"
+    },
+    "history": [
+      {
+        "timestamp": "2026-02-09T05:40:10.881Z",
+        "feature": "packages",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:40:16.080Z",
+        "feature": "packages",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:40:18.537Z",
+        "feature": "packages",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:40:22.114Z",
+        "feature": "packages",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:40:23.730Z",
+        "feature": "packages",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:41:42.767Z",
+        "feature": "prisma",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:41:56.047Z",
+        "feature": "api",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:41:59.110Z",
+        "feature": "api",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:42:01.675Z",
+        "feature": "db",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:42:11.370Z",
+        "feature": "routes",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:42:26.395Z",
+        "feature": "routes",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:42:41.001Z",
+        "feature": "routes",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:42:47.749Z",
+        "feature": "routes",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:42:59.676Z",
+        "feature": "jobs",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:43:14.163Z",
+        "feature": "scrapers",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:43:23.882Z",
+        "feature": "scrapers",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:43:34.511Z",
+        "feature": "scrapers",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:43:41.961Z",
+        "feature": "scrapers",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:43:44.241Z",
+        "feature": "scrapers",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:44:24.378Z",
+        "feature": "mobile",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:46:02.130Z",
+        "feature": "mobile",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:46:08.480Z",
+        "feature": "navigation",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:46:19.616Z",
+        "feature": "screens",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:46:27.219Z",
+        "feature": "screens",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:46:52.104Z",
+        "feature": "screens",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:47:02.704Z",
+        "feature": "screens",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:47:21.046Z",
+        "feature": "mobile",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:47:30.210Z",
+        "feature": "mobile",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:47:35.344Z",
+        "feature": "stores",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:47:37.523Z",
+        "feature": "stores",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:47:43.453Z",
+        "feature": "mobile",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T05:47:45.373Z",
+        "feature": "i18n",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T06:04:30.049Z",
+        "feature": "scrapers",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T06:05:30.424Z",
+        "feature": "packages",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T06:05:33.538Z",
+        "feature": "prisma",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T06:09:37.764Z",
+        "feature": "packages",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T06:09:39.294Z",
+        "feature": "packages",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-09T06:14:27.706Z",
+        "feature": "mobile",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:16:28.408Z",
+        "feature": "book_ranking",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:16:33.660Z",
+        "feature": "packages",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:16:53.683Z",
+        "feature": "api",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:17:26.686Z",
+        "feature": "test",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:17:28.835Z",
+        "feature": "test",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:17:45.709Z",
+        "feature": "packages",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:17:53.184Z",
+        "feature": "packages",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:18:06.078Z",
+        "feature": "packages",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:18:16.443Z",
+        "feature": "routes",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:18:37.577Z",
+        "feature": "routes",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:18:57.457Z",
+        "feature": "routes",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:19:06.900Z",
+        "feature": "routes",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:19:31.195Z",
+        "feature": "scrapers",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:19:45.084Z",
+        "feature": "scrapers",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:19:55.682Z",
+        "feature": "scrapers",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:44:16.026Z",
+        "feature": "mobile",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:51:29.667Z",
+        "feature": "mobile",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-10T01:55:50.129Z",
+        "feature": "mobile",
+        "phase": "do",
+        "action": "updated"
+      }
+    ]
+  }
+}

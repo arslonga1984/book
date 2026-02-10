@@ -1,0 +1,35 @@
+{
+  "tabs": {
+    "home": "ホーム",
+    "settings": "設定"
+  },
+  "screens": {
+    "countryRanking": "ベストセラー",
+    "bookDetail": "書籍詳細"
+  },
+  "home": {
+    "title": "世界のベストセラー",
+    "viewAll": "すべて見る"
+  },
+  "ranking": {
+    "top20": "TOP 20",
+    "source": "情報元",
+    "noData": "データがありません"
+  },
+  "book": {
+    "publisher": "出版社",
+    "description": "あらすじ",
+    "authorInfo": "著者について",
+    "rankHistory": "順位履歴",
+    "purchase": "購入する",
+    "showOriginal": "原文を表示",
+    "showTranslation": "翻訳を表示",
+    "notFound": "書籍が見つかりません"
+  },
+  "settings": {
+    "title": "設定",
+    "language": "言語",
+    "about": "情報",
+    "version": "バージョン"
+  }
+}

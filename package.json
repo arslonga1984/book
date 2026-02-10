@@ -1,0 +1,24 @@
+{
+  "name": "book-ranking",
+  "version": "1.0.0",
+  "private": true,
+  "description": "World Bestseller Ranking Mobile App",
+  "scripts": {
+    "dev:api": "pnpm --filter @book-ranking/api dev",
+    "dev:mobile": "pnpm --filter @book-ranking/mobile start",
+    "build:api": "pnpm --filter @book-ranking/api build",
+    "build:shared": "pnpm --filter @book-ranking/shared build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "db:migrate": "pnpm --filter @book-ranking/api db:migrate",
+    "db:generate": "pnpm --filter @book-ranking/api db:generate"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.18",
+    "vitest": "^4.0.18"
+  }
+}

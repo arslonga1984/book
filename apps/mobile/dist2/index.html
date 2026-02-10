@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Bestsellers</title>
+  <link rel="icon" href="/favicon.ico" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Noto Sans SC', 'Noto Sans JP', sans-serif; background: #f0f2f5; color: #1e293b; min-height: 100vh; }
+
+    /* Header */
+    .header { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 24px 20px; color: #fff; text-align: center; position: relative; }
+    .header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+    .header p { font-size: 13px; color: #bfdbfe; margin-top: 4px; }
+
+    /* Language Selector */
+    .lang-selector { position: absolute; top: 16px; right: 16px; }
+    .lang-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 13px; cursor: pointer; backdrop-filter: blur(4px); }
+    .lang-btn:hover { background: rgba(255,255,255,0.25); }
+    .lang-dropdown { display: none; position: absolute; top: 100%; right: 0; margin-top: 4px; background: #fff; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); overflow: hidden; z-index: 100; min-width: 150px; }
+    .lang-dropdown.open { display: block; }
+    .lang-option { display: flex; align-items: center; gap: 8px; padding: 10px 16px; cursor: pointer; font-size: 14px; color: #1e293b; transition: background 0.15s; white-space: nowrap; }
+    .lang-option:hover { background: #f1f5f9; }
+    .lang-option.active { background: #eff6ff; color: #2563eb; font-weight: 600; }
+
+    /* Tabs */
+    .tabs { display: flex; justify-content: center; gap: 8px; padding: 14px 16px; background: #fff; border-bottom: 1px solid #e2e8f0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab { display: flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 24px; background: #f1f5f9; border: none; cursor: pointer; font-size: 14px; color: #475569; font-weight: 500; white-space: nowrap; transition: all 0.2s; }
+    .tab:hover { background: #e2e8f0; }
+    .tab.active { background: #2563eb; color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,0.3); }
+    .tab .flag { font-size: 20px; }
+
+    /* Layout */
+    .layout { max-width: 1200px; margin: 0 auto; padding: 20px 16px 40px; }
+    .section-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    .section-title .count { font-size: 13px; font-weight: 400; color: #94a3b8; }
+
+    /* Book Grid */
+    .book-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+
+    /* Book Card */
+    .book-card { display: flex; background: #fff; border-radius: 14px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); position: relative; cursor: pointer; color: inherit; transition: box-shadow 0.2s, transform 0.15s; }
+    .book-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-1px); }
+    .rank-badge { position: absolute; top: 10px; left: 10px; background: #64748b; color: #fff; border-radius: 10px; min-width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; z-index: 1; padding: 0 4px; }
+    .rank-1 { background: linear-gradient(135deg, #f59e0b, #d97706); font-size: 14px; min-width: 30px; height: 30px; }
+    .rank-2 { background: linear-gradient(135deg, #94a3b8, #64748b); font-size: 13px; min-width: 28px; height: 28px; }
+    .rank-3 { background: linear-gradient(135deg, #cd7c2f, #a0522d); font-size: 13px; min-width: 28px; height: 28px; }
+    .cover { width: 75px; height: 108px; border-radius: 8px; background: #e2e8f0; object-fit: cover; flex-shrink: 0; }
+    .cover-placeholder { display: flex; align-items: center; justify-content: center; font-size: 30px; }
+    .book-info { flex: 1; margin-left: 14px; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+    .book-title { font-size: 15px; font-weight: 600; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+    .book-author { font-size: 13px; color: #64748b; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .book-price { font-size: 14px; font-weight: 700; color: #2563eb; margin-top: 8px; }
+    .book-tag { display: inline-block; font-size: 11px; color: #fff; background: #ef4444; border-radius: 4px; padding: 1px 6px; margin-top: 6px; font-weight: 500; width: fit-content; }
+
+    /* Loading / Error / Empty */
+    .center { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 350px; }
+    .spinner { width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { margin-top: 14px; font-size: 14px; color: #64748b; }
+    .error-text { font-size: 14px; color: #dc2626; text-align: center; margin-bottom: 16px; line-height: 1.5; }
+    .retry-btn { background: #2563eb; color: #fff; border: none; padding: 10px 28px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+    .retry-btn:hover { background: #1d4ed8; }
+    .empty-text { font-size: 14px; color: #94a3b8; }
+
+    /* Footer */
+    .footer { text-align: center; padding: 20px; font-size: 12px; color: #94a3b8; }
+
+    /* ===== Detail Modal ===== */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; backdrop-filter: blur(2px); }
+    .modal-overlay.open { display: block; }
+    .modal { position: fixed; bottom: 0; left: 0; right: 0; max-height: 90vh; background: #fff; border-radius: 20px 20px 0 0; z-index: 201; transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; display: flex; flex-direction: column; }
+    .modal.open { transform: translateY(0); }
+    .modal-handle { width: 40px; height: 4px; background: #cbd5e1; border-radius: 2px; margin: 10px auto 0; flex-shrink: 0; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px 8px; flex-shrink: 0; }
+    .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; padding: 4px 8px; border-radius: 8px; line-height: 1; }
+    .modal-close:hover { background: #f1f5f9; }
+    .modal-body { overflow-y: auto; padding: 0 20px 30px; -webkit-overflow-scrolling: touch; }
+    .modal-loading { display: flex; align-items: center; justify-content: center; min-height: 200px; }
+
+    /* Modal Content */
+    .detail-top { display: flex; gap: 16px; margin-bottom: 20px; }
+    .detail-cover { width: 120px; height: 172px; border-radius: 10px; object-fit: cover; background: #e2e8f0; flex-shrink: 0; }
+    .detail-cover-placeholder { display: flex; align-items: center; justify-content: center; font-size: 48px; width: 120px; height: 172px; border-radius: 10px; background: #e2e8f0; flex-shrink: 0; }
+    .detail-meta { flex: 1; min-width: 0; }
+    .detail-title { font-size: 18px; font-weight: 700; line-height: 1.4; word-break: break-word; }
+    .detail-author { font-size: 14px; color: #64748b; margin-top: 6px; }
+    .detail-publisher { font-size: 13px; color: #94a3b8; margin-top: 2px; }
+    .detail-price { font-size: 18px; font-weight: 700; color: #2563eb; margin-top: 10px; }
+    .detail-rank-badge { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; padding: 4px 10px; border-radius: 6px; background: #fef3c7; color: #92400e; font-size: 13px; font-weight: 600; }
+
+    .detail-section { margin-top: 20px; }
+    .detail-section-title { font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0; }
+    .detail-desc { font-size: 14px; line-height: 1.7; color: #475569; }
+    .detail-desc-placeholder { font-size: 14px; color: #94a3b8; font-style: italic; }
+
+    /* Rank History */
+    .rank-history { display: flex; gap: 8px; flex-wrap: wrap; }
+    .rank-history-item { display: flex; flex-direction: column; align-items: center; background: #f8fafc; border-radius: 8px; padding: 6px 10px; min-width: 60px; }
+    .rank-history-date { font-size: 11px; color: #94a3b8; }
+    .rank-history-rank { font-size: 16px; font-weight: 700; color: #1e293b; margin-top: 2px; }
+
+    /* Purchase Links */
+    .purchase-links { display: flex; flex-direction: column; gap: 8px; }
+    .purchase-link { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #f8fafc; border-radius: 10px; text-decoration: none; color: inherit; transition: background 0.15s; }
+    .purchase-link:hover { background: #eff6ff; }
+    .purchase-store { font-size: 14px; font-weight: 600; }
+    .purchase-price { font-size: 14px; color: #2563eb; font-weight: 600; }
+    .purchase-arrow { color: #94a3b8; font-size: 16px; }
+
+    /* PC: 2 columns */
+    @media (min-width: 640px) {
+      .header h1 { font-size: 28px; }
+      .layout { padding: 24px 24px 48px; }
+      .book-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      .book-card { padding: 16px; }
+      .cover { width: 85px; height: 122px; }
+      .book-title { font-size: 16px; }
+      .modal { max-width: 600px; left: 50%; right: auto; transform: translate(-50%, 100%); border-radius: 20px 20px 0 0; }
+      .modal.open { transform: translate(-50%, 0); }
+    }
+
+    /* Large PC: 3 columns */
+    @media (min-width: 1024px) {
+      .book-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 id="header-title"></h1>
+    <p id="header-subtitle"></p>
+    <div class="lang-selector">
+      <button class="lang-btn" id="lang-btn"></button>
+      <div class="lang-dropdown" id="lang-dropdown"></div>
+    </div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="layout">
+    <div class="section-title" id="section-title"></div>
+    <div id="book-list"></div>
+  </div>
+  <div class="footer" id="footer-text"></div>
+
+  <!-- Detail Modal -->
+  <div class="modal-overlay" id="modal-overlay"></div>
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span id="modal-title-label" style="font-weight:600;font-size:15px;color:#64748b;"></span>
+      <button class="modal-close" id="modal-close">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <div class="modal-loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <script>
+    var API_URL = 'https://mystery-safely-italiano-exploration.trycloudflare.com/api/v1';
+
+    // ===== i18n Dictionary =====
+    var I18N = {
+      ko: {
+        headerTitle: '\ud83d\udcda \uc138\uacc4 \ubca0\uc2a4\ud2b8\uc140\ub7ec',
+        headerSubtitle: 'World Bestsellers Rankings',
+        countries: { KR: '\ud55c\uad6d', JP: '\uc77c\ubcf8', CN: '\uc911\uad6d', US: '\ubbf8\uad6d', UK: '\uc601\uad6d' },
+        top20: 'TOP 20',
+        bestseller: 'Bestseller',
+        loading: '\ub79c\ud0b9 \ub85c\ub529 \uc911...',
+        error: '\ub79c\ud0b9\uc744 \ubd88\ub7ec\uc62c \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.<br>\uc5f0\uacb0\uc744 \ud655\uc778\ud558\uace0 \ub2e4\uc2dc \uc2dc\ub3c4\ud574\uc8fc\uc138\uc694.',
+        retry: '\ub2e4\uc2dc \uc2dc\ub3c4',
+        empty: '\uc774 \uad6d\uac00\uc758 \ub370\uc774\ud130\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.',
+        footer: '\uc804 \uc138\uacc4 \uc8fc\uc694 \uc11c\uc810\uc5d0\uc11c \uc8fc\uae30\uc801\uc73c\ub85c \uc5c5\ub370\uc774\ud2b8\ub429\ub2c8\ub2e4.',
+        detailTitle: '\ub3c4\uc11c \uc0c1\uc138',
+        description: '\ucc45 \uc18c\uac1c',
+        descPlaceholder: '\uc124\uba85 \uc900\ube44 \uc911...',
+        rankHistory: '\uc21c\uc704 \ubcc0\ub3d9',
+        purchase: '\uad6c\ub9e4\ud558\uae30',
+        rankLabel: '\uc21c\uc704',
+        langLabel: '\ud55c\uad6d\uc5b4',
+      },
+      en: {
+        headerTitle: '\ud83d\udcda World Bestsellers',
+        headerSubtitle: 'Global Book Rankings',
+        countries: { KR: 'Korea', JP: 'Japan', CN: 'China', US: 'USA', UK: 'UK' },
+        top20: 'TOP 20',
+        bestseller: 'Bestseller',
+        loading: 'Loading rankings...',
+        error: 'Failed to load rankings.<br>Please check your connection and try again.',
+        retry: 'Retry',
+        empty: 'No data available for this country.',
+        footer: 'Data updated periodically from major bookstores worldwide.',
+        detailTitle: 'Book Detail',
+        description: 'Description',
+        descPlaceholder: 'Description coming soon...',
+        rankHistory: 'Rank History',
+        purchase: 'Purchase',
+        rankLabel: 'Rank',
+        langLabel: 'English',
+      },
+      ja: {
+        headerTitle: '\ud83d\udcda \u4e16\u754c\u30d9\u30b9\u30c8\u30bb\u30e9\u30fc',
+        headerSubtitle: '\u30ef\u30fc\u30eb\u30c9\u30d9\u30b9\u30c8\u30bb\u30e9\u30fc\u30e9\u30f3\u30ad\u30f3\u30b0',
+        countries: { KR: '\u97d3\u56fd', JP: '\u65e5\u672c', CN: '\u4e2d\u56fd', US: '\u30a2\u30e1\u30ea\u30ab', UK: '\u30a4\u30ae\u30ea\u30b9' },
+        top20: 'TOP 20',
+        bestseller: '\u30d9\u30b9\u30c8\u30bb\u30e9\u30fc',
+        loading: '\u30e9\u30f3\u30ad\u30f3\u30b0\u3092\u8aad\u307f\u8fbc\u307f\u4e2d...',
+        error: '\u30e9\u30f3\u30ad\u30f3\u30b0\u306e\u8aad\u307f\u8fbc\u307f\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002<br>\u63a5\u7d9a\u3092\u78ba\u8a8d\u3057\u3066\u304f\u3060\u3055\u3044\u3002',
+        retry: '\u30ea\u30c8\u30e9\u30a4',
+        empty: '\u3053\u306e\u56fd\u306e\u30c7\u30fc\u30bf\u306f\u3042\u308a\u307e\u305b\u3093\u3002',
+        footer: '\u4e16\u754c\u4e3b\u8981\u66f8\u5e97\u304b\u3089\u5b9a\u671f\u7684\u306b\u66f4\u65b0\u3055\u308c\u307e\u3059\u3002',
+        detailTitle: '\u66f8\u7c4d\u8a73\u7d30',
+        description: '\u7d39\u4ecb',
+        descPlaceholder: '\u8aac\u660e\u6e96\u5099\u4e2d...',
+        rankHistory: '\u30e9\u30f3\u30ad\u30f3\u30b0\u5c65\u6b74',
+        purchase: '\u8cfc\u5165',
+        rankLabel: '\u9806\u4f4d',
+        langLabel: '\u65e5\u672c\u8a9e',
+      },
+      zh: {
+        headerTitle: '\ud83d\udcda \u4e16\u754c\u7545\u9500\u4e66',
+        headerSubtitle: '\u5168\u7403\u56fe\u4e66\u6392\u884c\u699c',
+        countries: { KR: '\u97e9\u56fd', JP: '\u65e5\u672c', CN: '\u4e2d\u56fd', US: '\u7f8e\u56fd', UK: '\u82f1\u56fd' },
+        top20: 'TOP 20',
+        bestseller: '\u7545\u9500\u4e66',
+        loading: '\u6b63\u5728\u52a0\u8f7d\u6392\u884c\u699c...',
+        error: '\u65e0\u6cd5\u52a0\u8f7d\u6392\u884c\u699c\u3002<br>\u8bf7\u68c0\u67e5\u7f51\u7edc\u8fde\u63a5\u540e\u91cd\u8bd5\u3002',
+        retry: '\u91cd\u8bd5',
+        empty: '\u6682\u65e0\u8be5\u56fd\u5bb6\u7684\u6570\u636e\u3002',
+        footer: '\u5b9a\u671f\u4ece\u5168\u7403\u4e3b\u8981\u4e66\u5e97\u66f4\u65b0\u6570\u636e\u3002',
+        detailTitle: '\u56fe\u4e66\u8be6\u60c5',
+        description: '\u5185\u5bb9\u7b80\u4ecb',
+        descPlaceholder: '\u7b80\u4ecb\u51c6\u5907\u4e2d...',
+        rankHistory: '\u6392\u540d\u53d8\u5316',
+        purchase: '\u8d2d\u4e70',
+        rankLabel: '\u6392\u540d',
+        langLabel: '\u4e2d\u6587',
+      },
+    };
+
+    var LANG_OPTIONS = [
+      { code: 'ko', flag: '\ud83c\uddf0\ud83c\uddf7', label: '\ud55c\uad6d\uc5b4' },
+      { code: 'en', flag: '\ud83c\uddfa\ud83c\uddf8', label: 'English' },
+      { code: 'ja', flag: '\ud83c\uddef\ud83c\uddf5', label: '\u65e5\u672c\u8a9e' },
+      { code: 'zh', flag: '\ud83c\udde8\ud83c\uddf3', label: '\u4e2d\u6587' },
+    ];
+
+    var COUNTRIES = [
+      { code: 'KR', flag: '\ud83c\uddf0\ud83c\uddf7' },
+      { code: 'JP', flag: '\ud83c\uddef\ud83c\uddf5' },
+      { code: 'CN', flag: '\ud83c\udde8\ud83c\uddf3' },
+      { code: 'US', flag: '\ud83c\uddfa\ud83c\uddf8' },
+      { code: 'UK', flag: '\ud83c\uddec\ud83c\udde7' },
+    ];
+
+    var selected = 'KR';
+    var currentLang = 'ko';
+    var currentBooks = [];
+
+    function t(key) { return I18N[currentLang][key] || I18N.en[key] || key; }
+    function tc(code) { return I18N[currentLang].countries[code] || code; }
+
+    // ===== Language Selector =====
+    function renderLangSelector() {
+      var current = LANG_OPTIONS.find(function(l) { return l.code === currentLang; });
+      document.getElementById('lang-btn').textContent = current.flag + ' ' + current.label;
+
+      var dd = document.getElementById('lang-dropdown');
+      dd.innerHTML = LANG_OPTIONS.map(function(l) {
+        return '<div class="lang-option' + (l.code === currentLang ? ' active' : '') + '" data-lang="' + l.code + '">' +
+          l.flag + ' ' + l.label + '</div>';
+      }).join('');
+
+      dd.querySelectorAll('.lang-option').forEach(function(opt) {
+        opt.addEventListener('click', function(e) {
+          e.stopPropagation();
+          currentLang = opt.dataset.lang;
+          dd.classList.remove('open');
+          applyLanguage();
+        });
+      });
+    }
+
+    function applyLanguage() {
+      document.getElementById('header-title').textContent = t('headerTitle');
+      document.getElementById('header-subtitle').textContent = t('headerSubtitle');
+      document.getElementById('footer-text').textContent = t('footer');
+      renderLangSelector();
+      renderTabs();
+      fetchRankings();
+    }
+
+    // Toggle dropdown
+    document.getElementById('lang-btn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      document.getElementById('lang-dropdown').classList.toggle('open');
+    });
+    document.addEventListener('click', function() {
+      document.getElementById('lang-dropdown').classList.remove('open');
+    });
+
+    // ===== Tabs =====
+    function renderTabs() {
+      var el = document.getElementById('tabs');
+      el.innerHTML = COUNTRIES.map(function(c) {
+        return '<button class="tab' + (c.code === selected ? ' active' : '') + '" data-code="' + c.code + '">' +
+          '<span class="flag">' + c.flag + '</span>' + tc(c.code) + '</button>';
+      }).join('');
+      el.querySelectorAll('.tab').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          selected = btn.dataset.code;
+          renderTabs();
+          fetchRankings();
+        });
+      });
+    }
+
+    // ===== Loading / Error / Empty =====
+    function showLoading() {
+      var info = COUNTRIES.find(function(c) { return c.code === selected; });
+      document.getElementById('section-title').innerHTML =
+        info.flag + ' ' + tc(selected) + ' ' + t('top20') + ' <span class="count">' + t('bestseller') + '</span>';
+      document.getElementById('book-list').innerHTML =
+        '<div class="center"><div class="spinner"></div><div class="loading-text">' + t('loading') + '</div></div>';
+    }
+
+    function showError() {
+      document.getElementById('book-list').innerHTML =
+        '<div class="center"><div class="error-text">' + t('error') + '</div>' +
+        '<button class="retry-btn" onclick="fetchRankings()">' + t('retry') + '</button></div>';
+    }
+
+    // ===== Helpers =====
+    function formatPrice(price, currency) {
+      if (!price) return '';
+      var num = Number(price);
+      if (isNaN(num)) return (currency || '') + ' ' + price;
+      var symbols = { KRW: '\u20a9', CNY: '\u00a5', JPY: '\u00a5', USD: '$', GBP: '\u00a3' };
+      var sym = symbols[currency] || currency || '';
+      return sym + num.toLocaleString();
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      var d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      var d = new Date(dateStr);
+      return (d.getMonth() + 1) + '/' + d.getDate();
+    }
+
+    // ===== Render Books =====
+    function renderBooks(books) {
+      currentBooks = books || [];
+      if (currentBooks.length === 0) {
+        document.getElementById('book-list').innerHTML =
+          '<div class="center"><div class="empty-text">' + t('empty') + '</div></div>';
+        return;
+      }
+      var html = '<div class="book-grid">';
+      currentBooks.forEach(function(book) {
+        var coverHtml = book.coverImageUrl
+          ? '<img class="cover" src="' + escapeHtml(book.coverImageUrl) + '" alt="" loading="lazy" onerror="this.outerHTML=\'<div class=\\\'cover cover-placeholder\\\'>&#x1f4da;</div>\'" />'
+          : '<div class="cover cover-placeholder">\ud83d\udcda</div>';
+        var priceHtml = book.price
+          ? '<div class="book-price">' + formatPrice(book.price, book.currency) + '</div>'
+          : '';
+        var newTag = book.isNew ? '<div class="book-tag">NEW</div>' : '';
+        var rankClass = book.rank <= 3 ? ' rank-' + book.rank : '';
+        html += '<div class="book-card" data-book-id="' + book.id + '">' +
+          '<div class="rank-badge' + rankClass + '">' + book.rank + '</div>' +
+          coverHtml +
+          '<div class="book-info">' +
+          '<div class="book-title">' + escapeHtml(book.title) + '</div>' +
+          '<div class="book-author">' + escapeHtml(book.author) + '</div>' +
+          priceHtml + newTag +
+          '</div></div>';
+      });
+      html += '</div>';
+      document.getElementById('book-list').innerHTML = html;
+
+      // Attach click handlers for modal
+      document.querySelectorAll('.book-card[data-book-id]').forEach(function(card) {
+        card.addEventListener('click', function() {
+          openModal(card.dataset.bookId);
+        });
+      });
+    }
+
+    // ===== Fetch Rankings =====
+    async function fetchRankings() {
+      showLoading();
+      try {
+        var res = await fetch(API_URL + '/rankings?country=' + selected + '&lang=' + currentLang);
+        var data = await res.json();
+        if (data.success && data.data && data.data.books) {
+          renderBooks(data.data.books);
+        } else {
+          renderBooks([]);
+        }
+      } catch (err) {
+        showError();
+      }
+    }
+
+    // ===== Detail Modal =====
+    var modalOverlay = document.getElementById('modal-overlay');
+    var modal = document.getElementById('modal');
+    var modalBody = document.getElementById('modal-body');
+
+    function openModal(bookId) {
+      document.getElementById('modal-title-label').textContent = t('detailTitle');
+      modalBody.innerHTML = '<div class="modal-loading"><div class="spinner"></div></div>';
+      modalOverlay.classList.add('open');
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      fetchBookDetail(bookId);
+    }
+
+    function closeModal() {
+      modal.classList.remove('open');
+      modalOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', closeModal);
+
+    // Close on back button (mobile)
+    window.addEventListener('popstate', function() {
+      if (modal.classList.contains('open')) {
+        closeModal();
+      }
+    });
+
+    async function fetchBookDetail(bookId) {
+      try {
+        var res = await fetch(API_URL + '/books/' + bookId + '?lang=' + currentLang);
+        var data = await res.json();
+        if (data.success && data.data) {
+          renderDetail(data.data);
+        } else {
+          modalBody.innerHTML = '<div class="modal-loading"><div class="error-text">' + t('error') + '</div></div>';
+        }
+      } catch (err) {
+        modalBody.innerHTML = '<div class="modal-loading"><div class="error-text">' + t('error') + '</div></div>';
+      }
+    }
+
+    function renderDetail(book) {
+      var coverHtml = book.coverImageUrl
+        ? '<img class="detail-cover" src="' + escapeHtml(book.coverImageUrl) + '" alt="" onerror="this.outerHTML=\'<div class=\\\'detail-cover-placeholder\\\'>&#x1f4da;</div>\'" />'
+        : '<div class="detail-cover-placeholder">\ud83d\udcda</div>';
+
+      var priceHtml = book.price
+        ? '<div class="detail-price">' + formatPrice(book.price, book.currency) + '</div>'
+        : '';
+
+      var currentRank = (book.rankHistory && book.rankHistory.length > 0)
+        ? book.rankHistory[0].rank
+        : null;
+      var rankBadgeHtml = currentRank
+        ? '<div class="detail-rank-badge">\ud83c\udfc6 ' + t('rankLabel') + ' #' + currentRank + '</div>'
+        : '';
+
+      // Description section
+      var descHtml = book.description
+        ? '<div class="detail-desc">' + escapeHtml(book.description) + '</div>'
+        : '<div class="detail-desc-placeholder">' + t('descPlaceholder') + '</div>';
+
+      // Rank History section
+      var historyHtml = '';
+      if (book.rankHistory && book.rankHistory.length > 0) {
+        historyHtml = '<div class="rank-history">';
+        book.rankHistory.forEach(function(entry) {
+          historyHtml += '<div class="rank-history-item">' +
+            '<div class="rank-history-date">' + formatDate(entry.date) + '</div>' +
+            '<div class="rank-history-rank">#' + entry.rank + '</div>' +
+            '</div>';
+        });
+        historyHtml += '</div>';
+      }
+
+      // Purchase Links section
+      var purchaseHtml = '';
+      if (book.purchaseLinks && book.purchaseLinks.length > 0) {
+        purchaseHtml = '<div class="purchase-links">';
+        book.purchaseLinks.forEach(function(link) {
+          var linkPrice = link.price ? formatPrice(link.price, link.currency) : '';
+          purchaseHtml += '<a class="purchase-link" href="' + escapeHtml(link.storeUrl) + '" target="_blank" rel="noopener noreferrer">' +
+            '<span class="purchase-store">' + escapeHtml(link.storeName) + '</span>' +
+            (linkPrice ? '<span class="purchase-price">' + linkPrice + '</span>' : '') +
+            '<span class="purchase-arrow">\u203a</span>' +
+            '</a>';
+        });
+        purchaseHtml += '</div>';
+      }
+
+      // Author info section
+      var authorInfoHtml = '';
+      if (book.authorInfo && book.authorInfo.bio) {
+        authorInfoHtml = '<div class="detail-section">' +
+          '<div class="detail-section-title">\u2709\ufe0f ' + escapeHtml(book.authorInfo.name || book.author) + '</div>' +
+          '<div class="detail-desc">' + escapeHtml(book.authorInfo.bio) + '</div>' +
+          '</div>';
+      }
+
+      modalBody.innerHTML =
+        '<div class="detail-top">' +
+          coverHtml +
+          '<div class="detail-meta">' +
+            '<div class="detail-title">' + escapeHtml(book.title) + '</div>' +
+            '<div class="detail-author">' + escapeHtml(book.author) + '</div>' +
+            (book.publisher ? '<div class="detail-publisher">' + escapeHtml(book.publisher) + '</div>' : '') +
+            priceHtml +
+            rankBadgeHtml +
+          '</div>' +
+        '</div>' +
+        '<div class="detail-section">' +
+          '<div class="detail-section-title">' + t('description') + '</div>' +
+          descHtml +
+        '</div>' +
+        (historyHtml ? '<div class="detail-section"><div class="detail-section-title">' + t('rankHistory') + '</div>' + historyHtml + '</div>' : '') +
+        authorInfoHtml +
+        (purchaseHtml ? '<div class="detail-section"><div class="detail-section-title">' + t('purchase') + '</div>' + purchaseHtml + '</div>' : '');
+
+      // Push history state for back button support
+      if (history.state !== 'modal') {
+        history.pushState('modal', '');
+      }
+    }
+
+    // ===== Init =====
+    applyLanguage();
+  </script>
+</body>
+</html>

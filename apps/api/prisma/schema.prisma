@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Country {
+  id            Int      @id @default(autoincrement())
+  code          String   @unique
+  nameKo        String   @map("name_ko")
+  nameEn        String   @map("name_en")
+  nameZh        String   @map("name_zh")
+  nameJa        String   @map("name_ja")
+  bookstoreName String   @map("bookstore_name")
+  bookstoreUrl  String   @map("bookstore_url")
+  flag          String
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  books    Book[]
+  rankings Ranking[]
+
+  @@map("countries")
+}
+
+model Author {
+  id           Int      @id @default(autoincrement())
+  name         String
+  nameOriginal String?  @map("name_original")
+  bio          String?
+  bioKo        String?  @map("bio_ko")
+  bioEn        String?  @map("bio_en")
+  bioZh        String?  @map("bio_zh")
+  bioJa        String?  @map("bio_ja")
+  imageUrl     String?  @map("image_url")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  books Book[]
+
+  @@map("authors")
+}
+
+model Book {
+  id              Int      @id @default(autoincrement())
+  countryId       Int      @map("country_id")
+  authorId        Int?     @map("author_id")
+  isbn            String?
+  title           String
+  titleKo         String?  @map("title_ko")
+  titleEn         String?  @map("title_en")
+  titleZh         String?  @map("title_zh")
+  titleJa         String?  @map("title_ja")
+  authorName      String   @map("author_name")
+  publisher       String?
+  price           String?
+  currency        String?
+  coverImageUrl   String?  @map("cover_image_url")
+  detailUrl       String   @map("detail_url")
+  description     String?
+  descriptionKo   String?  @map("description_ko")
+  descriptionEn   String?  @map("description_en")
+  descriptionZh   String?  @map("description_zh")
+  descriptionJa   String?  @map("description_ja")
+  category        String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  country  Country   @relation(fields: [countryId], references: [id])
+  author   Author?   @relation(fields: [authorId], references: [id])
+  rankings Ranking[]
+
+  @@unique([countryId, isbn])
+  @@index([countryId])
+  @@index([authorId])
+  @@map("books")
+}
+
+model Ranking {
+  id          Int      @id @default(autoincrement())
+  bookId      Int      @map("book_id")
+  countryId   Int      @map("country_id")
+  rank        Int
+  rankingDate DateTime @map("ranking_date")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  book    Book    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  country Country @relation(fields: [countryId], references: [id])
+
+  @@unique([bookId, countryId, rankingDate])
+  @@index([countryId, rankingDate])
+  @@index([rankingDate])
+  @@map("rankings")
+}
+
+model ScrapeLog {
+  id           Int      @id @default(autoincrement())
+  countryCode  String   @map("country_code")
+  status       String
+  booksCount   Int      @default(0) @map("books_count")
+  errorMessage String?  @map("error_message")
+  duration     Int?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([countryCode, createdAt])
+  @@map("scrape_logs")
+}

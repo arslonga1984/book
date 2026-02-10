@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm --version:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm install:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npx tsx:*)",
+      "Bash(curl:*)",
+      "Bash(pnpm --filter @book-ranking/api add:*)",
+      "Bash(pnpm --filter @book-ranking/shared add:*)",
+      "Bash(pnpm --filter @book-ranking/shared test)",
+      "Bash(pnpm --filter @book-ranking/api test:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm --filter @book-ranking/api test:coverage:*)",
+      "Bash(timeout:*)",
+      "Bash(node -e:*)",
+      "Bash(npx expo start:*)",
+      "Bash(ngrok version:*)",
+      "Bash(where:*)",
+      "Bash(npx localtunnel:*)",
+      "Bash(npx expo export:*)",
+      "Bash(npx serve:*)",
+      "Bash(/c/Users/ecoto/AppData/Local/Microsoft/WinGet/Packages/Cloudflare.cloudflared_Microsoft.Winget.Source_8wekyb3d8bbwe/cloudflared.exe tunnel:*)",
+      "Bash(node:*)",
+      "Bash(powershell:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(\"C:/Users/ecoto/AppData/Local/Microsoft/WinGet/Packages/Cloudflare.cloudflared_Microsoft.Winget.Source_8wekyb3d8bbwe/cloudflared.exe\" tunnel --url http://localhost:8081)",
+      "Bash(cmd /c \"rmdir /s /q C:\\\\Users\\\\ecoto\\\\book_ranking\\\\apps\\\\mobile\\\\dist\")",
+      "Bash(\"C:/Users/ecoto/AppData/Local/Microsoft/WinGet/Packages/Cloudflare.cloudflared_Microsoft.Winget.Source_8wekyb3d8bbwe/cloudflared.exe\" tunnel --url http://localhost:3000)",
+      "Bash(npx tsc:*)",
+      "Bash(pnpm build:api:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

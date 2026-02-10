@@ -1,0 +1,35 @@
+{
+  "tabs": {
+    "home": "Home",
+    "settings": "Settings"
+  },
+  "screens": {
+    "countryRanking": "Bestsellers",
+    "bookDetail": "Book Details"
+  },
+  "home": {
+    "title": "World Bestsellers",
+    "viewAll": "View All"
+  },
+  "ranking": {
+    "top20": "TOP 20",
+    "source": "Source",
+    "noData": "No data available"
+  },
+  "book": {
+    "publisher": "Publisher",
+    "description": "Description",
+    "authorInfo": "About the Author",
+    "rankHistory": "Rank History",
+    "purchase": "Buy Now",
+    "showOriginal": "Show Original",
+    "showTranslation": "Show Translation",
+    "notFound": "Book not found"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "about": "About",
+    "version": "Version"
+  }
+}

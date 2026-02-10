@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "Book Ranking",
+    "slug": "book-ranking",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#2563eb"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bookranking.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    }
+  }
+}
