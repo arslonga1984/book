@@ -86,8 +86,15 @@
 
 None. All planned features are fully implemented.
 
+## Deployment Status (2026-02-10)
+
+- Production scraping completed: 99 books (KR:20, US:20, JP:19, UK:20, CN:20)
+- API: https://book-ranking-api.onrender.com (Render.com)
+- Web: https://arslonga1984.github.io/book/ (GitHub Pages)
+- DB: Neon.tech PostgreSQL (connected, populated)
+
 ## Recommendations
 
-1. **Run scrapers** to populate description data in production DB (many books may have null descriptions until scraping runs)
-2. Consider adding `titleKo`, `titleEn`, `titleJa`, `titleZh` localized fields to DB for full i18n support on book titles (currently `getLocalizedField` falls back to original title)
-3. Consider error boundary for individual purchase link failures in modal
+1. ~~Run scrapers to populate description data~~ **DONE** - Scraping completed via POST /api/v1/scrape
+2. Consider adding scheduled scraping (cron) for automatic data refresh
+3. Consider translation API integration for localized book titles/descriptions
