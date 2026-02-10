@@ -1,9 +1,3 @@
-databases:
-  - name: book-ranking-db
-    plan: free
-    databaseName: book_ranking
-    user: book_ranking_user
-
 services:
   - type: web
     name: book-ranking-api
@@ -20,6 +14,4 @@ services:
       - key: HOST
         value: "0.0.0.0"
       - key: DATABASE_URL
-        fromDatabase:
-          name: book-ranking-db
-          property: connectionString
+        sync: false
