@@ -46,6 +46,7 @@ function makeRanking(bookId: number, rank: number) {
       coverImageUrl: `https://example.com/cover${bookId}.jpg`,
       price: '15000',
       currency: 'KRW',
+      author: null,
     },
   }
 }
@@ -103,6 +104,34 @@ describe('Rankings routes', () => {
       const body = response.json()
       expect(body.data.books[0].translationStatus).toBe('source')
       expect(body.data.books[0].title).toBe('Book 1')
+    })
+
+
+    it('should localize author names for english when author profile exists', async () => {
+      const ranking = makeRanking(1, 1)
+      ranking.book.author = {
+        id: 11,
+        name: 'Han Kang',
+        nameOriginal: '한강',
+      }
+
+      mockPrisma.country.findUnique.mockResolvedValue(mockCountry)
+      mockPrisma.ranking.findFirst.mockResolvedValue({
+        rankingDate: today,
+      } as any)
+      mockPrisma.ranking.findMany
+        .mockResolvedValueOnce([ranking as any])
+        .mockResolvedValueOnce([])
+
+      const app = await buildApp(rankingsRoutes, '/api/v1/rankings')
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/v1/rankings?country=KR&lang=en',
+      })
+
+      const body = response.json()
+      expect(body.data.books[0].author).toBe('Han Kang')
+      expect(body.data.books[0].authorOriginal).toBe('한강')
     })
 
     it('should calculate rank changes from previous week', async () => {

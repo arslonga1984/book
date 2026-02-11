@@ -30,6 +30,7 @@ export const rankingsRoutes: FastifyPluginAsync = async (app) => {
           isNew: boolean
           title: string
           author: string
+          authorOriginal: string | null
           translationStatus: 'ready' | 'source'
           coverImageUrl: string | null
           price: string | null
@@ -77,7 +78,11 @@ export const rankingsRoutes: FastifyPluginAsync = async (app) => {
         rankingDate: targetDate,
       },
       include: {
-        book: true,
+        book: {
+          include: {
+            author: true,
+          },
+        },
       },
       orderBy: { rank: 'asc' },
       take: 20,
@@ -105,13 +110,16 @@ export const rankingsRoutes: FastifyPluginAsync = async (app) => {
       const isNew = prevRank === undefined
       const localizedTitle = getLocalizedTitle(r.book, query.lang)
 
+      const localizedAuthor = getLocalizedAuthor(r.book.author, r.book.authorName, query.lang)
+
       return {
         id: r.book.id,
         rank: r.rank,
         rankChange,
         isNew,
         title: localizedTitle.value,
-        author: r.book.authorName,
+        author: localizedAuthor.displayName,
+        authorOriginal: localizedAuthor.originalName,
         translationStatus: localizedTitle.status,
         coverImageUrl: r.book.coverImageUrl,
         price: r.book.price,
@@ -185,4 +193,26 @@ function getLocalizedTitle(
   }
 
   return { value: book.title, status: 'source' }
+}
+
+function getLocalizedAuthor(
+  author: { name: string; nameOriginal: string | null } | null | undefined,
+  fallbackAuthorName: string,
+  lang: LanguageCode
+): { displayName: string; originalName: string | null } {
+  if (!author) {
+    return { displayName: fallbackAuthorName, originalName: null }
+  }
+
+  if (lang === 'en') {
+    return {
+      displayName: author.name || fallbackAuthorName,
+      originalName: author.nameOriginal ?? fallbackAuthorName,
+    }
+  }
+
+  return {
+    displayName: author.nameOriginal ?? fallbackAuthorName,
+    originalName: author.name ?? null,
+  }
 }

@@ -81,6 +81,7 @@ export const booksRoutes: FastifyPluginAsync = async (app) => {
       isbn: book.isbn,
       title: localizedTitle.value,
       author: book.authorName,
+      authorOriginal: null,
       publisher: book.publisher,
       price: book.price,
       currency: book.currency,
@@ -130,6 +131,7 @@ export const booksRoutes: FastifyPluginAsync = async (app) => {
 
     const localizedTitle = getLocalizedFieldWithStatus(book, 'title', lang)
     const localizedDescription = getLocalizedFieldWithStatus(book, 'description', lang)
+    const localizedAuthor = getLocalizedAuthor(book.author, book.authorName, lang)
 
     return {
       success: true,
@@ -139,7 +141,8 @@ export const booksRoutes: FastifyPluginAsync = async (app) => {
         isbn: book.isbn,
         title: localizedTitle.value,
         titleOriginal: book.title,
-        author: book.authorName,
+        author: localizedAuthor.displayName,
+        authorOriginal: localizedAuthor.originalName,
         publisher: book.publisher,
         price: book.price,
         currency: book.currency,
@@ -233,4 +236,27 @@ function getDetailTranslationStatus(
   }
 
   return hasReady ? 'ready' : 'source'
+}
+
+
+function getLocalizedAuthor(
+  author: { name: string; nameOriginal?: string | null } | null,
+  fallbackAuthorName: string,
+  lang: LanguageCode
+): { displayName: string; originalName: string | null } {
+  if (!author) {
+    return { displayName: fallbackAuthorName, originalName: null }
+  }
+
+  if (lang === 'en') {
+    return {
+      displayName: author.name || fallbackAuthorName,
+      originalName: author.nameOriginal ?? fallbackAuthorName,
+    }
+  }
+
+  return {
+    displayName: author.nameOriginal ?? fallbackAuthorName,
+    originalName: author.name ?? null,
+  }
 }

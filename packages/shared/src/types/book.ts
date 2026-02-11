@@ -16,6 +16,7 @@ export interface Book {
   title: string
   titleTranslated?: TranslatedText
   author: string
+  authorOriginal?: string
   authorTranslated?: TranslatedText
   publisher?: string
   price?: string

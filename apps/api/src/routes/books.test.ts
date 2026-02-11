@@ -284,6 +284,35 @@ describe('Books routes', () => {
       expect(body.data.description).toBe('A great book')
     })
 
+
+    it('should localize author names in detail when author profile exists', async () => {
+      const bookWithAuthorProfile = {
+        ...mockBook,
+        author: {
+          id: 10,
+          name: 'Na Tae-joo',
+          nameOriginal: '나태주',
+          bio: null,
+          bioKo: null,
+          bioEn: null,
+          bioZh: null,
+          bioJa: null,
+          imageUrl: null,
+        },
+      }
+      mockPrisma.book.findUnique.mockResolvedValue(bookWithAuthorProfile as any)
+
+      const app = await buildApp(booksRoutes, '/api/v1/books')
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/v1/books/1?lang=en',
+      })
+
+      const body = response.json()
+      expect(body.data.author).toBe('Na Tae-joo')
+      expect(body.data.authorOriginal).toBe('나태주')
+    })
+
     it('should include rank history', async () => {
       const bookWithHistory = {
         ...mockBook,
