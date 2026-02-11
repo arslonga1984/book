@@ -20,4 +20,10 @@ describe('sanitizeDescription', () => {
       '삶의 고비마다 힘이 되어준 말\n좋아하는 일을 하고\n다음 문장'
     )
   })
+
+  it('handles uppercase escaped HTML entities', () => {
+    const raw = '&LT;b&GT;강조 텍스트&LT;/b&GT;&LT;BR/&GT;다음 문장'
+    expect(sanitizeDescription(raw)).toBe('강조 텍스트\n다음 문장')
+  })
+
 })

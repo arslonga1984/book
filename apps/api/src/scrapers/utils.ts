@@ -20,7 +20,7 @@ function decodeHtmlEntities(text: string): string {
       return String.fromCodePoint(value)
     }
 
-    return NAMED_ENTITIES[entity] ?? ' '
+    return NAMED_ENTITIES[entity.toLowerCase()] ?? ' '
   })
 }
 
