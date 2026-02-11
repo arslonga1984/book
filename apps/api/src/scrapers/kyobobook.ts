@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio'
 import type { ScraperResult, ScrapedBook } from './index.js'
 import { config } from '../config.js'
+import { sanitizeDescription } from './utils.js'
 
 // YES24 베스트셀러 (교보문고 API가 보호되어 YES24로 대체)
 const YES24_BESTSELLER_URL = 'https://www.yes24.com/Product/Category/BestSeller'
@@ -20,13 +21,13 @@ async function fetchYes24Description(detailUrl: string): Promise<string | undefi
 
     // YES24 상세페이지 책 소개 영역
     const desc =
-      $('.infoWrap_txt, .txtContentText, #infoset_introduce .infoWrap_txt')
+      $('.infoWrap_txt, .txtContentText, #infoset_introduce .infoWrap_txt, #infoset_introduce, .infoWrap_txt .txtContentText, .Ere_prod_mconts_LS .infoWrap_txt')
         .first()
-        .text()
-        .trim() ||
-      $('meta[property="og:description"]').attr('content')?.trim()
+        .html()?.trim() ||
+      $('meta[property="og:description"]').attr('content')?.trim() ||
+      $('meta[name="description"]').attr('content')?.trim()
 
-    return desc || undefined
+    return sanitizeDescription(desc)
   } catch {
     return undefined
   }

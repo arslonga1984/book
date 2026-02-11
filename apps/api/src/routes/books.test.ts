@@ -241,6 +241,25 @@ describe('Books routes', () => {
       expect(body.data.description).toBe('A great book in English')
     })
 
+
+    it('should sanitize HTML tags in description fields', async () => {
+      const bookWithHtmlDesc = {
+        ...mockBook,
+        description: '<b>어느 공적인 인간의 초상</b> &nbsp; 이해찬 회고록',
+        descriptionKo: '<b>어느 공적인 인간의 초상</b> &nbsp; 이해찬 회고록',
+      }
+      mockPrisma.book.findUnique.mockResolvedValue(bookWithHtmlDesc as any)
+
+      const app = await buildApp(booksRoutes, '/api/v1/books')
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/v1/books/1?lang=ko',
+      })
+
+      const body = response.json()
+      expect(body.data.description).toBe("어느 공적인 인간의 초상 이해찬 회고록")
+    })
+
     it('should include rank history', async () => {
       const bookWithHistory = {
         ...mockBook,

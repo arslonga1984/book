@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { prisma } from '../db/prisma.js'
 import type { CountryCode, LanguageCode } from '@book-ranking/shared'
 import { getCachedValue, setCachedValue } from '../utils/cache.js'
+import { sanitizeDescription } from '../scrapers/utils.js'
 
 const querySchema = z.object({
   country: z.enum(['KR', 'JP', 'CN', 'US', 'UK']).optional(),
@@ -134,7 +135,7 @@ export const booksRoutes: FastifyPluginAsync = async (app) => {
         currency: book.currency,
         coverImageUrl: book.coverImageUrl,
         detailUrl: book.detailUrl,
-        description: getLocalizedField(book, 'description', lang),
+        description: sanitizeDescription(getLocalizedField(book, 'description', lang)) ?? null,
         category: book.category,
         rankHistory: book.rankings.map((r) => ({
           rank: r.rank,

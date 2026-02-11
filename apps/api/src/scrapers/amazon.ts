@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio'
 import type { ScraperResult, ScrapedBook } from './index.js'
 import { config } from '../config.js'
+import { sanitizeDescription } from './utils.js'
 
 async function fetchAmazonDescription(
   detailUrl: string,
@@ -20,14 +21,23 @@ async function fetchAmazonDescription(
 
     const desc =
       $('#bookDescription_feature_div .a-expander-content span')
-        .text()
-        .trim() ||
+        .first()
+        .html()?.trim() ||
       $('#bookDescription_feature_div noscript')
-        .text()
-        .trim() ||
+        .first()
+        .html()?.trim() ||
+      $('#bookDescription_feature_div')
+        .first()
+        .html()?.trim() ||
+      $('#productDescription')
+        .first()
+        .html()?.trim() ||
+      $('.book-description')
+        .first()
+        .html()?.trim() ||
       $('meta[name="description"]').attr('content')?.trim()
 
-    return desc || undefined
+    return sanitizeDescription(desc)
   } catch {
     return undefined
   }
