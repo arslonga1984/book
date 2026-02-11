@@ -1,112 +1,107 @@
-# Plan: Book Detail Page (SPA Navigation) + Description Fix + Full i18n
+# Plan: 번역 기능 마무리 + 언어 선택 UX 단순화
 
-## Requirements
-1. **Detail Page = SPA page navigation** (not modal popup): clicking a book navigates to a full detail view within the same page, replacing the list view. Back button returns to list.
-2. **Fix description not loading**: descriptions are being scraped but likely not making it to the DB due to the scraping selectors or data flow. Investigate and fix.
-3. **Language selection translates titles AND author names**: currently the rankings API returns `r.book.authorName` (the raw scraper value) regardless of language. Need to translate book titles and author names when language changes.
+## 목표
+- 언어 선택 시 **페이지 전체 텍스트가 일관되게 번역된 것처럼 보이는 경험**을 제공한다.
+- 현재처럼 일부만 번역되는 문제(제목만 번역, 설명/저자/출판사 혼재)를 줄인다.
+- 우측 상단 언어 선택 UI를 단순화해 사용자가 빠르게 원하는 언어를 고를 수 있게 한다.
 
-## Current State Analysis
+## 현재 문제 요약
+1. 번역 데이터 소스가 불완전해 페이지 내 필드별 언어 일관성이 깨진다.
+2. 실시간 번역/사전 번역 경계가 불명확해 응답 품질이 들쭉날쭉하다.
+3. 언어 옵션이 많아 보이고, 실제 사용자에게 필요한 언어 우선순위가 반영되지 않는다.
+4. 일부 KR 데이터는 HTML 정제 이슈까지 겹쳐 번역 품질 체감이 더 떨어진다.
 
-### Description Issue
-- Scrapers now have `fetchYes24Description()`, `fetchAmazonDescription()`, `fetchDangdangDescription()` helpers
-- These fetch individual detail pages and parse description via CSS selectors
-- The `ScrapedBook.description` field is populated and the DB upsert saves it
-- **Likely cause**: Scraping hasn't been re-run since adding the description code, OR the CSS selectors don't match the actual page HTML (sites may use different structures/require JS rendering)
-- **Fix approach**: We can't change the external sites, but we can improve the scraper selectors to be more resilient and add `og:description` / `meta[name=description]` as reliable fallbacks. Also ensure the scraper is run after deployment.
+---
 
-### Author Name Translation
-- DB schema: `Book.authorName` is a single string (no localized variants like `authorNameKo`, `authorNameEn`, etc.)
-- `Author` model has `name` + `nameOriginal` but no localized name fields either
-- Rankings API line 87: `author: r.book.authorName` - always returns the raw scraped name
-- **Solution options**:
-  - Option A: Add `authorNameKo/En/Zh/Ja` fields to Book schema (DB migration) - heavy
-  - Option B: Use client-side transliteration or the existing `Author.name` + `Author.nameOriginal` - limited
-  - Option C: Return `authorName` as-is for the ranking list (names are proper nouns), but on the detail page use the `Author.name` field which could be set to a common/international name. Add `detailUrl` to the ranking response so the detail page can show original name alongside translated name.
+## 제안 아키텍처 (MVP 기준)
 
-  **Recommended**: Keep author names as-is (proper nouns are typically not translated - "Haruki Murakami" stays "Haruki Murakami"). BUT display them in the **original script** of the source country. When the user switches language, the `title` should translate (via `titleKo/En/Zh/Ja` DB fields) while the author name is shown as scraped. If the user wants "author name in their script", that's a transliteration task beyond simple i18n and would need a translation API or DB migration. For now, keep author name as-is from the scraper.
+### 1) 번역 전략: "사전 번역 + 폴백" 하이브리드
+- 기본: 스크래핑 후 백엔드에서 사전 번역을 저장(캐시/DB).
+- 폴백: 번역 미완료 시 원문 노출 + `translationStatus` 메타(`ready|partial|source`) 반환.
+- UI: `partial/source` 상태에서 "원문 포함" 배지 또는 토스트로 사용자 기대치 관리.
 
-### Detail Page (SPA Navigation vs Modal)
-- Current: clicking book opens a modal overlay
-- Requested: clicking book navigates to a detail page within the SPA (replaces the list view, back button returns)
-- **Approach**: Use a simple SPA router based on `history.pushState` / `popstate`:
-  - State `list`: shows header + tabs + book grid (current view)
-  - State `detail/{bookId}`: shows header + back button + detail content (full page)
-  - Transition: animate or instant replace of `#app-content`
-  - Back button: `popstate` event returns to list view
+### 2) 번역 대상 필드 우선순위
+- P0(필수): `title`, `description`
+- P1(권장): `authorName`, `publisher`, `category`
+- P2(선택): 배지/버튼/빈 상태 문구 등 UI 문자열
 
-## Changes
+### 3) 번역 엔진(무료 우선)
+- 1순위: LibreTranslate 자체 호스팅(비용 0원 API, 인프라 비용만 발생)
+- 2순위: 초기 개발용 공개 무료 엔드포인트(프로덕션은 비권장)
+- 공통: provider 인터페이스 분리(`translate(text, from, to)`)로 교체 가능 구조 유지
 
-### 1. `apps/mobile/dist2/index.html` - Major rewrite
+### 4) 데이터 품질 가드레일
+- 번역 전 HTML sanitize(특히 KR 설명 `<br>`, `<b>` 등) → 번역 → 저장 순서 고정
+- 동일 문장 중복 번역 방지 캐시
+- 길이 제한/실패 재시도/백오프
+- 고유명사(인명·출판사)는 규칙 기반 원문 유지 옵션 제공
 
-**Remove**: Modal overlay, modal CSS, modal JS (`openModal`, `closeModal`, modal HTML elements)
+---
 
-**Add**: SPA Router
-```
-var currentView = 'list'  // 'list' | 'detail'
-var currentBookId = null
+## 언어 선택 UX 개선안
 
-function navigate(view, bookId) {
-  // push state
-  // render appropriate view
-}
+### 현재 문제
+- 언어가 많아 보이고 선택 비용이 큼.
+- 사용 빈도 높은 언어를 빠르게 고를 수 없음.
 
-window.addEventListener('popstate', function() {
-  // restore previous view from state
-})
-```
+### 개선안
+1. **Top 4 고정 + 더보기**
+   - 기본 노출: `한국어`, `English`, `日本語`, `中文`
+   - 나머지 언어는 `More` 드롭다운으로 숨김
+2. **국가 기반 추천 우선 정렬**
+   - 선택한 국가 탭에 따라 추천 언어 순서를 변경
+   - 예: KR 탭에서 한국어 1순위, JP 탭에서 일본어 1순위
+3. **최근 선택 언어 pinning**
+   - 최근 1개 언어를 첫 위치에 고정
+4. **자동 감지 최소화**
+   - 첫 방문 1회만 브라우저 언어를 제안하고, 이후는 사용자 선택 고정
+5. **용어 통일**
+   - 언어명은 자국어 표기 우선(예: `한국어`, `English`, `日本語`, `中文`)
 
-**Add**: Detail Page View
-- Full-page layout (not overlay) with:
-  - Back navigation bar at top (left arrow + "Back to list" text)
-  - Large cover image (centered or left-aligned)
-  - Title (translated via API `lang` param)
-  - Author name (as returned by API)
-  - Publisher, Price
-  - Description section (or placeholder)
-  - Rank history section
-  - Purchase links section
-  - Author info section (if available)
-- Language selector remains in header (persists across views)
-- Country tabs hidden on detail view
+---
 
-**Modify**: Book card click handler
-- Change from `openModal(bookId)` to `navigate('detail', bookId)`
+## 구현 단계(2주 MVP)
 
-**Modify**: Language change behavior
-- If on list view: reload rankings (current behavior)
-- If on detail view: re-fetch book detail with new lang param
+### Phase 1 (2~3일): 모델/응답 계약 정리
+- API 응답에 `translationStatus` 추가
+- 필드별 번역 우선순위 확정 및 타입 반영
+- 언어 코드 표준화(`ko|en|ja|zh` 우선)
 
-### 2. Scraper description selectors improvement (3 files)
+### Phase 2 (3~4일): 번역 서비스 계층
+- `translation service` 모듈 추가(provider 인터페이스)
+- LibreTranslate 연동 + 실패 처리(타임아웃/재시도)
+- 텍스트 캐시 키 규칙 정의(`hash(text)+from+to`)
 
-**`apps/api/src/scrapers/kyobobook.ts`**:
-- Current selectors: `.infoWrap_txt`, `.txtContentText`, `#infoset_introduce .infoWrap_txt`
-- Add fallback: `#infoset_introduce`, `.infoWrap_txt .txtContentText`, `meta[property="og:description"]`
-- Also try: `.Ere_prod_mconts_LS .infoWrap_txt` (YES24 2024+ layout)
+### Phase 3 (2~3일): 스크래퍼/저장 파이프라인
+- sanitize → translate → persist 순서 적용
+- 백필 작업(기존 데이터 재번역 배치)
+- 모니터링 로그(성공률/실패율/지연)
 
-**`apps/api/src/scrapers/amazon.ts`**:
-- Current selectors: `#bookDescription_feature_div .a-expander-content span`, `noscript`
-- Add fallback: `#bookDescription_feature_div`, `#productDescription`, `.book-description`
-- Amazon is notoriously hard to scrape (requires JS rendering), so `meta[name="description"]` is the most reliable
+### Phase 4 (2~3일): 프론트 언어 선택 UX 개편
+- Top4 + More 컴포넌트로 교체
+- 최근 선택 pinning + 국가별 추천 정렬
+- `translationStatus` 기반 안내 UI 추가
 
-**`apps/api/src/scrapers/dangdang.ts`**:
-- Current selectors: `.descrip`, `#content .descrip`, `.msg_desc`
-- Add fallback: `.product_info .descrip`, `#detail_describe`, `meta[name="description"]`
+### Phase 5 (1~2일): QA/릴리즈
+- 다국어 스냅샷 테스트(목록/상세)
+- 번역 누락/부분 번역 케이스 수동 점검
+- 점진 배포(국가별/트래픽 비율)
 
-### 3. No DB migration needed
-- Title translation already works via `titleKo/En/Zh/Ja` fields + `getLocalizedField()`
-- Author name has no localized DB fields, will display as scraped (proper nouns)
-- Description translation works via `descriptionKo/En/Zh/Ja` fields
+---
 
-## Files to Modify
-1. `apps/mobile/dist2/index.html` - SPA navigation + detail page + remove modal
-2. `apps/api/src/scrapers/kyobobook.ts` - Improve description selectors
-3. `apps/api/src/scrapers/amazon.ts` - Improve description selectors
-4. `apps/api/src/scrapers/dangdang.ts` - Improve description selectors
+## 성공 지표(KPI)
+- 언어 전환 후 "부분 번역" 노출 비율 50% 이상 감소
+- 상세 페이지 번역 일관성(필수 필드 P0) 95% 이상
+- 언어 변경 후 첫 콘텐츠 표시 시간(체감) 1.5초 이내
+- 번역 실패율 3% 이하
 
-## Verification
-1. Click book on list → page transitions to detail view (no modal)
-2. Click back / browser back → returns to list with scroll position preserved
-3. Language change on list → titles reload in selected language
-4. Language change on detail → re-fetches detail in selected language
-5. Description shows if available, placeholder if null
-6. Mobile + PC layouts both work
+## 리스크 및 대응
+- 번역 품질 편차: 고유명사 번역 제외 규칙 + 예외 사전
+- 비용/성능: 사전 번역 캐시, 배치 처리, TTL 조정
+- 장애 대응: provider down 시 원문 폴백 + 상태 표기
+
+## 즉시 착수 권장 작업 (이번 스프린트)
+1. `translationStatus` 계약 추가
+2. LibreTranslate PoC 연결
+3. 언어 선택 UI를 Top4 + More 구조로 축소
+4. KR 설명 sanitize/번역 순서 강제(회귀 테스트 포함)

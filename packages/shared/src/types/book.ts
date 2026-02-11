@@ -7,6 +7,8 @@ export interface TranslatedText {
   ja?: string
 }
 
+export type TranslationStatus = 'ready' | 'partial' | 'source'
+
 export interface Book {
   id: number
   countryCode: CountryCode
@@ -23,6 +25,7 @@ export interface Book {
   description?: string
   descriptionTranslated?: TranslatedText
   category?: string
+  translationStatus?: TranslationStatus
   createdAt: Date
   updatedAt: Date
 }

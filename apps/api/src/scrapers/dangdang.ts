@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio'
 import type { ScraperResult, ScrapedBook } from './index.js'
 import { config } from '../config.js'
+import { sanitizeDescription } from './utils.js'
 
 const DANGDANG_BESTSELLER_URL = 'http://bang.dangdang.com/books/bestsellers/01.00.00.00.00.00-24hours-0-0-1-1'
 
@@ -21,13 +22,12 @@ async function fetchDangdangDescription(detailUrl: string): Promise<string | und
     const $ = cheerio.load(html)
 
     const desc =
-      $('.descrip, #content .descrip, .msg_desc')
+      $('.descrip, #content .descrip, .msg_desc, .product_info .descrip, #detail_describe')
         .first()
-        .text()
-        .trim() ||
+        .html()?.trim() ||
       $('meta[name="description"]').attr('content')?.trim()
 
-    return desc || undefined
+    return sanitizeDescription(desc)
   } catch {
     return undefined
   }

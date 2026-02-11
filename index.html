@@ -15,14 +15,18 @@
     .header p { font-size: 13px; color: #bfdbfe; margin-top: 4px; }
 
     /* Language Selector */
-    .lang-selector { position: absolute; top: 16px; right: 16px; }
-    .lang-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 13px; cursor: pointer; backdrop-filter: blur(4px); }
-    .lang-btn:hover { background: rgba(255,255,255,0.25); }
-    .lang-dropdown { display: none; position: absolute; top: 100%; right: 0; margin-top: 4px; background: #fff; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); overflow: hidden; z-index: 100; min-width: 150px; }
+    .lang-selector { position: absolute; top: 14px; right: 16px; display: flex; align-items: center; gap: 6px; }
+    .lang-quick-btn { background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.28); color: #fff; padding: 6px 8px; border-radius: 8px; font-size: 12px; cursor: pointer; backdrop-filter: blur(4px); min-width: 44px; }
+    .lang-quick-btn.active { background: rgba(255,255,255,0.28); font-weight: 700; }
+    .lang-more { position: relative; }
+    .lang-btn { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 9px; border-radius: 8px; font-size: 12px; cursor: pointer; backdrop-filter: blur(4px); }
+    .lang-btn:hover, .lang-quick-btn:hover { background: rgba(255,255,255,0.26); }
+    .lang-dropdown { display: none; position: absolute; top: 100%; right: 0; margin-top: 4px; background: #fff; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); overflow: hidden; z-index: 100; min-width: 170px; }
     .lang-dropdown.open { display: block; }
-    .lang-option { display: flex; align-items: center; gap: 8px; padding: 10px 16px; cursor: pointer; font-size: 14px; color: #1e293b; transition: background 0.15s; white-space: nowrap; }
+    .lang-option { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; cursor: pointer; font-size: 13px; color: #1e293b; transition: background 0.15s; white-space: nowrap; }
     .lang-option:hover { background: #f1f5f9; }
     .lang-option.active { background: #eff6ff; color: #2563eb; font-weight: 600; }
+    .lang-recent { font-size: 10px; color: #64748b; background: #e2e8f0; border-radius: 10px; padding: 1px 6px; }
 
     /* Tabs */
     .tabs { display: flex; justify-content: center; gap: 8px; padding: 14px 16px; background: #fff; border-bottom: 1px solid #e2e8f0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -54,6 +58,8 @@
     .book-author { font-size: 13px; color: #64748b; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .book-price { font-size: 14px; font-weight: 700; color: #2563eb; margin-top: 8px; }
     .book-tag { display: inline-block; font-size: 11px; color: #fff; background: #ef4444; border-radius: 4px; padding: 1px 6px; margin-top: 6px; font-weight: 500; width: fit-content; }
+    .book-tag.source { background: #475569; }
+    .detail-notice { margin-top: 8px; font-size: 12px; color: #64748b; }
 
     /* Loading / Error / Empty */
     .center { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 350px; }
@@ -132,10 +138,7 @@
   <div class="header">
     <h1 id="header-title"></h1>
     <p id="header-subtitle"></p>
-    <div class="lang-selector">
-      <button class="lang-btn" id="lang-btn"></button>
-      <div class="lang-dropdown" id="lang-dropdown"></div>
-    </div>
+    <div class="lang-selector" id="lang-selector"></div>
   </div>
   <div class="tabs" id="tabs"></div>
   <div class="layout">
@@ -180,6 +183,10 @@
         purchase: '\uad6c\ub9e4\ud558\uae30',
         rankLabel: '\uc21c\uc704',
         langLabel: '\ud55c\uad6d\uc5b4',
+        newTag: 'NEW',
+        sourceBadge: '\uc6d0\ubb38',
+        sourceNotice: '\ubc88\uc5ed \ub370\uc774\ud130\uac00 \ubd80\ubd84 \ub610\ub294 \uc6d0\ubb38\uc785\ub2c8\ub2e4.',
+        moreLang: '\ub354\ubcf4\uae30',
       },
       en: {
         headerTitle: '\ud83d\udcda World Bestsellers',
@@ -199,6 +206,10 @@
         purchase: 'Purchase',
         rankLabel: 'Rank',
         langLabel: 'English',
+        newTag: 'NEW',
+        sourceBadge: 'Source',
+        sourceNotice: 'Some fields are shown in the original language.',
+        moreLang: 'More',
       },
       ja: {
         headerTitle: '\ud83d\udcda \u4e16\u754c\u30d9\u30b9\u30c8\u30bb\u30e9\u30fc',
@@ -218,6 +229,10 @@
         purchase: '\u8cfc\u5165',
         rankLabel: '\u9806\u4f4d',
         langLabel: '\u65e5\u672c\u8a9e',
+        newTag: 'NEW',
+        sourceBadge: '\u539f\u6587',
+        sourceNotice: '\u4e00\u90e8\u306e\u60c5\u5831\u306f\u539f\u6587\u306e\u307e\u307e\u3067\u3059\u3002',
+        moreLang: '\u305d\u306e\u4ed6',
       },
       zh: {
         headerTitle: '\ud83d\udcda \u4e16\u754c\u7545\u9500\u4e66',
@@ -237,6 +252,10 @@
         purchase: '\u8d2d\u4e70',
         rankLabel: '\u6392\u540d',
         langLabel: '\u4e2d\u6587',
+        newTag: 'NEW',
+        sourceBadge: '\u539f\u6587',
+        sourceNotice: '\u90e8\u5206\u5185\u5bb9\u4ecd\u4e3a\u539f\u8bed\u3002',
+        moreLang: '\u66f4\u591a',
       },
     };
 
@@ -256,31 +275,81 @@
     ];
 
     var selected = 'KR';
-    var currentLang = 'ko';
+    var currentLang = localStorage.getItem('wb-lang') || 'ko';
+    var recentLang = localStorage.getItem('wb-lang-recent') || currentLang;
     var currentBooks = [];
 
     function t(key) { return I18N[currentLang][key] || I18N.en[key] || key; }
     function tc(code) { return I18N[currentLang].countries[code] || code; }
 
+    function getRecommendedLangOrder(countryCode) {
+      var preferredByCountry = {
+        KR: ['ko', 'en', 'ja', 'zh'],
+        JP: ['ja', 'en', 'ko', 'zh'],
+        CN: ['zh', 'en', 'ko', 'ja'],
+        US: ['en', 'ko', 'ja', 'zh'],
+        UK: ['en', 'ko', 'ja', 'zh'],
+      };
+      return preferredByCountry[countryCode] || ['ko', 'en', 'ja', 'zh'];
+    }
+
     // ===== Language Selector =====
+    function setLanguage(langCode) {
+      if (langCode === currentLang) {
+        return;
+      }
+      currentLang = langCode;
+      recentLang = langCode;
+      localStorage.setItem('wb-lang', currentLang);
+      localStorage.setItem('wb-lang-recent', recentLang);
+      applyLanguage();
+    }
+
     function renderLangSelector() {
-      var current = LANG_OPTIONS.find(function(l) { return l.code === currentLang; });
-      document.getElementById('lang-btn').textContent = current.flag + ' ' + current.label;
+      var order = getRecommendedLangOrder(selected);
+      var ordered = LANG_OPTIONS.slice().sort(function(a, b) {
+        if (a.code === recentLang) return -1;
+        if (b.code === recentLang) return 1;
+        return order.indexOf(a.code) - order.indexOf(b.code);
+      });
 
-      var dd = document.getElementById('lang-dropdown');
-      dd.innerHTML = LANG_OPTIONS.map(function(l) {
-        return '<div class="lang-option' + (l.code === currentLang ? ' active' : '') + '" data-lang="' + l.code + '">' +
-          l.flag + ' ' + l.label + '</div>';
-      }).join('');
+      var quick = ordered.slice(0, 3);
+      var more = ordered.slice(3);
 
-      dd.querySelectorAll('.lang-option').forEach(function(opt) {
+      var host = document.getElementById('lang-selector');
+      host.innerHTML = quick.map(function(l) {
+        return '<button class="lang-quick-btn' + (l.code === currentLang ? ' active' : '') + '" data-lang="' + l.code + '">' + l.label + '</button>';
+      }).join('') +
+      '<div class="lang-more">' +
+        '<button class="lang-btn" id="lang-btn">' + t('moreLang') + ' ▾</button>' +
+        '<div class="lang-dropdown" id="lang-dropdown">' +
+          more.map(function(l) {
+            return '<div class="lang-option' + (l.code === currentLang ? ' active' : '') + '" data-lang="' + l.code + '">' +
+              '<span>' + l.flag + ' ' + l.label + '</span>' +
+              (l.code === recentLang ? '<span class="lang-recent">RECENT</span>' : '') +
+              '</div>';
+          }).join('') +
+        '</div>' +
+      '</div>';
+
+      host.querySelectorAll('[data-lang]').forEach(function(opt) {
         opt.addEventListener('click', function(e) {
           e.stopPropagation();
-          currentLang = opt.dataset.lang;
-          dd.classList.remove('open');
-          applyLanguage();
+          var code = opt.getAttribute('data-lang');
+          setLanguage(code);
+          var dd = document.getElementById('lang-dropdown');
+          if (dd) dd.classList.remove('open');
         });
       });
+
+      var moreBtn = document.getElementById('lang-btn');
+      if (moreBtn) {
+        moreBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var dd = document.getElementById('lang-dropdown');
+          if (dd) dd.classList.toggle('open');
+        });
+      }
     }
 
     function applyLanguage() {
@@ -292,13 +361,9 @@
       fetchRankings();
     }
 
-    // Toggle dropdown
-    document.getElementById('lang-btn').addEventListener('click', function(e) {
-      e.stopPropagation();
-      document.getElementById('lang-dropdown').classList.toggle('open');
-    });
     document.addEventListener('click', function() {
-      document.getElementById('lang-dropdown').classList.remove('open');
+      var dd = document.getElementById('lang-dropdown');
+      if (dd) dd.classList.remove('open');
     });
 
     // ===== Tabs =====
@@ -349,6 +414,49 @@
       return d.innerHTML;
     }
 
+    function decodeHtmlEntities(text) {
+      var named = {
+        nbsp: ' ',
+        amp: '&',
+        lt: '<',
+        gt: '>',
+        quot: '"',
+        apos: "'",
+      };
+
+      return text.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, function(_m, entity) {
+        if (entity[0] === '#') {
+          var hex = entity[1] && entity[1].toLowerCase() === 'x';
+          var parsed = parseInt(entity.slice(hex ? 2 : 1), hex ? 16 : 10);
+          if (isNaN(parsed)) return ' ';
+          try {
+            return String.fromCodePoint(parsed);
+          } catch (_e) {
+            return ' ';
+          }
+        }
+
+        return named[entity.toLowerCase()] || ' ';
+      });
+    }
+
+    function sanitizeDescriptionForDisplay(text) {
+      if (!text) return '';
+
+      // decode escaped HTML first so tags like &LT;br/&GT; are normalized
+      var decoded = decodeHtmlEntities(decodeHtmlEntities(text));
+
+      decoded = decoded
+        .replace(/<\s*br\s*\/?\s*>/gi, '\n')
+        .replace(/<\s*\/\s*(p|div|li|h[1-6])\s*>/gi, '\n')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/[\t\r ]+/g, ' ')
+        .replace(/[ \t]*\n[ \t]*/g, '\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+      return decoded;
+    }
+
     function formatDate(dateStr) {
       if (!dateStr) return '';
       var d = new Date(dateStr);
@@ -371,7 +479,10 @@
         var priceHtml = book.price
           ? '<div class="book-price">' + formatPrice(book.price, book.currency) + '</div>'
           : '';
-        var newTag = book.isNew ? '<div class="book-tag">NEW</div>' : '';
+        var newTag = book.isNew ? '<div class="book-tag">' + t('newTag') + '</div>' : '';
+        var sourceTag = (book.translationStatus && book.translationStatus !== 'ready')
+          ? '<div class="book-tag source">' + t('sourceBadge') + '</div>'
+          : '';
         var rankClass = book.rank <= 3 ? ' rank-' + book.rank : '';
         html += '<div class="book-card" data-book-id="' + book.id + '">' +
           '<div class="rank-badge' + rankClass + '">' + book.rank + '</div>' +
@@ -379,7 +490,7 @@
           '<div class="book-info">' +
           '<div class="book-title">' + escapeHtml(book.title) + '</div>' +
           '<div class="book-author">' + escapeHtml(book.author) + '</div>' +
-          priceHtml + newTag +
+          priceHtml + newTag + sourceTag +
           '</div></div>';
       });
       html += '</div>';
@@ -470,9 +581,13 @@
         : '';
 
       // Description section
-      var descHtml = book.description
-        ? '<div class="detail-desc">' + escapeHtml(book.description) + '</div>'
+      var sanitizedDesc = sanitizeDescriptionForDisplay(book.description);
+      var descHtml = sanitizedDesc
+        ? '<div class="detail-desc">' + escapeHtml(sanitizedDesc) + '</div>'
         : '<div class="detail-desc-placeholder">' + t('descPlaceholder') + '</div>';
+      var translationNotice = (book.translationStatus && book.translationStatus !== 'ready')
+        ? '<div class="detail-notice">' + t('sourceNotice') + '</div>'
+        : '';
 
       // Rank History section
       var historyHtml = '';
@@ -507,7 +622,7 @@
       if (book.authorInfo && book.authorInfo.bio) {
         authorInfoHtml = '<div class="detail-section">' +
           '<div class="detail-section-title">\u2709\ufe0f ' + escapeHtml(book.authorInfo.name || book.author) + '</div>' +
-          '<div class="detail-desc">' + escapeHtml(book.authorInfo.bio) + '</div>' +
+          '<div class="detail-desc">' + escapeHtml(sanitizeDescriptionForDisplay(book.authorInfo.bio)) + '</div>' +
           '</div>';
       }
 
@@ -524,7 +639,7 @@
         '</div>' +
         '<div class="detail-section">' +
           '<div class="detail-section-title">' + t('description') + '</div>' +
-          descHtml +
+          descHtml + translationNotice +
         '</div>' +
         (historyHtml ? '<div class="detail-section"><div class="detail-section-title">' + t('rankHistory') + '</div>' + historyHtml + '</div>' : '') +
         authorInfoHtml +

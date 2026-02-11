@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { buildApp } from '../test/helpers.js'
 import { booksRoutes } from './books.js'
 import { prisma } from '../db/prisma.js'
+import { clearAllCache } from '../utils/cache.js'
 
 const mockPrisma = vi.mocked(prisma)
 
@@ -51,6 +52,7 @@ const mockBook = {
 describe('Books routes', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    clearAllCache()
   })
 
   describe('GET /api/v1/books', () => {
@@ -84,6 +86,7 @@ describe('Books routes', () => {
 
       const body = response.json()
       expect(body.data[0].title).toBe('Test Book EN')
+      expect(body.data[0].translationStatus).toBe('ready')
     })
 
     it('should fall back to original title when translation missing', async () => {
@@ -98,6 +101,7 @@ describe('Books routes', () => {
 
       const body = response.json()
       expect(body.data[0].title).toBe('Test Book')
+      expect(body.data[0].translationStatus).toBe('source')
     })
 
     it('should filter by country', async () => {
@@ -138,6 +142,47 @@ describe('Books routes', () => {
           take: 10,
         })
       )
+    })
+
+
+    it('should support rank sort mode', async () => {
+      const rankedBook = {
+        ...mockBook,
+        id: 2,
+        updatedAt: new Date('2024-01-01'),
+        rankings: [{ rank: 1, rankingDate: new Date() }],
+      }
+      const lowBook = {
+        ...mockBook,
+        id: 1,
+        updatedAt: new Date('2024-01-02'),
+        rankings: [{ rank: 3, rankingDate: new Date() }],
+      }
+
+      mockPrisma.book.findMany.mockResolvedValue([lowBook, rankedBook] as any)
+      mockPrisma.book.count.mockResolvedValue(2)
+
+      const app = await buildApp(booksRoutes, '/api/v1/books')
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/v1/books?sort=rank',
+      })
+
+      const body = response.json()
+      expect(body.data[0].id).toBe(2)
+      expect(body.data[1].id).toBe(1)
+    })
+
+    it('should use cached list results for identical queries', async () => {
+      mockPrisma.book.findMany.mockResolvedValue([mockBook])
+      mockPrisma.book.count.mockResolvedValue(1)
+
+      const app = await buildApp(booksRoutes, '/api/v1/books')
+      await app.inject({ method: 'GET', url: '/api/v1/books?country=KR' })
+      await app.inject({ method: 'GET', url: '/api/v1/books?country=KR' })
+
+      expect(mockPrisma.book.findMany).toHaveBeenCalledTimes(1)
+      expect(mockPrisma.book.count).toHaveBeenCalledTimes(1)
     })
 
     it('should reject invalid country code', async () => {
@@ -196,6 +241,47 @@ describe('Books routes', () => {
       const body = response.json()
       expect(body.data.title).toBe('Test Book EN')
       expect(body.data.description).toBe('A great book in English')
+      expect(body.data.translationStatus).toBe('ready')
+    })
+
+
+    it('should sanitize HTML tags in description fields', async () => {
+      const bookWithHtmlDesc = {
+        ...mockBook,
+        description: '<b>어느 공적인 인간의 초상</b> &nbsp; 이해찬 회고록',
+        descriptionKo: '<b>어느 공적인 인간의 초상</b> &nbsp; 이해찬 회고록',
+      }
+      mockPrisma.book.findUnique.mockResolvedValue(bookWithHtmlDesc as any)
+
+      const app = await buildApp(booksRoutes, '/api/v1/books')
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/v1/books/1?lang=ko',
+      })
+
+      const body = response.json()
+      expect(body.data.description).toBe("어느 공적인 인간의 초상 이해찬 회고록")
+    })
+
+
+    it('should return partial translation status when some localized fields are missing', async () => {
+      const partiallyLocalizedBook = {
+        ...mockBook,
+        titleEn: 'Translated title',
+        descriptionEn: null,
+      }
+      mockPrisma.book.findUnique.mockResolvedValue(partiallyLocalizedBook as any)
+
+      const app = await buildApp(booksRoutes, '/api/v1/books')
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/v1/books/1?lang=en',
+      })
+
+      const body = response.json()
+      expect(body.data.translationStatus).toBe('partial')
+      expect(body.data.title).toBe('Translated title')
+      expect(body.data.description).toBe('A great book')
     })
 
     it('should include rank history', async () => {

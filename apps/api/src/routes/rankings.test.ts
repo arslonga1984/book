@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { buildApp } from '../test/helpers.js'
 import { rankingsRoutes } from './rankings.js'
 import { prisma } from '../db/prisma.js'
+import { clearAllCache } from '../utils/cache.js'
 
 const mockPrisma = vi.mocked(prisma)
 
@@ -52,6 +53,7 @@ function makeRanking(bookId: number, rank: number) {
 describe('Rankings routes', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    clearAllCache()
   })
 
   describe('GET /api/v1/rankings', () => {
@@ -76,6 +78,31 @@ describe('Rankings routes', () => {
       expect(body.data.countryCode).toBe('KR')
       expect(body.data.books).toHaveLength(2)
       expect(body.data.books[0].rank).toBe(1)
+      expect(body.data.books[0].translationStatus).toBe('ready')
+    })
+
+
+    it('should mark ranking title translation as source when localized title is missing', async () => {
+      const ranking = makeRanking(1, 1)
+      ranking.book.titleEn = null
+
+      mockPrisma.country.findUnique.mockResolvedValue(mockCountry)
+      mockPrisma.ranking.findFirst.mockResolvedValue({
+        rankingDate: today,
+      } as any)
+      mockPrisma.ranking.findMany
+        .mockResolvedValueOnce([ranking as any])
+        .mockResolvedValueOnce([])
+
+      const app = await buildApp(rankingsRoutes, '/api/v1/rankings')
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/v1/rankings?country=KR&lang=en',
+      })
+
+      const body = response.json()
+      expect(body.data.books[0].translationStatus).toBe('source')
+      expect(body.data.books[0].title).toBe('Book 1')
     })
 
     it('should calculate rank changes from previous week', async () => {
@@ -125,6 +152,30 @@ describe('Rankings routes', () => {
       const body = response.json()
       expect(body.data.books[0].isNew).toBe(true)
       expect(body.data.books[0].rankChange).toBeNull()
+    })
+
+
+    it('should use cached ranking results for identical queries', async () => {
+      mockPrisma.country.findUnique.mockResolvedValue(mockCountry)
+      mockPrisma.ranking.findFirst.mockResolvedValue({
+        rankingDate: today,
+      } as any)
+      mockPrisma.ranking.findMany
+        .mockResolvedValueOnce([makeRanking(1, 1)])
+        .mockResolvedValueOnce([])
+
+      const app = await buildApp(rankingsRoutes, '/api/v1/rankings')
+      await app.inject({
+        method: 'GET',
+        url: '/api/v1/rankings?country=KR',
+      })
+      await app.inject({
+        method: 'GET',
+        url: '/api/v1/rankings?country=KR',
+      })
+
+      expect(mockPrisma.country.findUnique).toHaveBeenCalledTimes(1)
+      expect(mockPrisma.ranking.findMany).toHaveBeenCalledTimes(2)
     })
 
     it('should return 404 for invalid country', async () => {
