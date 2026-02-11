@@ -349,6 +349,49 @@
       return d.innerHTML;
     }
 
+    function decodeHtmlEntities(text) {
+      var named = {
+        nbsp: ' ',
+        amp: '&',
+        lt: '<',
+        gt: '>',
+        quot: '"',
+        apos: "'",
+      };
+
+      return text.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, function(_m, entity) {
+        if (entity[0] === '#') {
+          var hex = entity[1] && entity[1].toLowerCase() === 'x';
+          var parsed = parseInt(entity.slice(hex ? 2 : 1), hex ? 16 : 10);
+          if (isNaN(parsed)) return ' ';
+          try {
+            return String.fromCodePoint(parsed);
+          } catch (_e) {
+            return ' ';
+          }
+        }
+
+        return named[entity.toLowerCase()] || ' ';
+      });
+    }
+
+    function sanitizeDescriptionForDisplay(text) {
+      if (!text) return '';
+
+      // decode escaped HTML first so tags like &LT;br/&GT; are normalized
+      var decoded = decodeHtmlEntities(decodeHtmlEntities(text));
+
+      decoded = decoded
+        .replace(/<\s*br\s*\/?\s*>/gi, '\n')
+        .replace(/<\s*\/\s*(p|div|li|h[1-6])\s*>/gi, '\n')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/[\t\r ]+/g, ' ')
+        .replace(/[ \t]*\n[ \t]*/g, '\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+      return decoded;
+    }
+
     function formatDate(dateStr) {
       if (!dateStr) return '';
       var d = new Date(dateStr);
@@ -470,8 +513,9 @@
         : '';
 
       // Description section
-      var descHtml = book.description
-        ? '<div class="detail-desc">' + escapeHtml(book.description) + '</div>'
+      var sanitizedDesc = sanitizeDescriptionForDisplay(book.description);
+      var descHtml = sanitizedDesc
+        ? '<div class="detail-desc">' + escapeHtml(sanitizedDesc) + '</div>'
         : '<div class="detail-desc-placeholder">' + t('descPlaceholder') + '</div>';
 
       // Rank History section
@@ -507,7 +551,7 @@
       if (book.authorInfo && book.authorInfo.bio) {
         authorInfoHtml = '<div class="detail-section">' +
           '<div class="detail-section-title">\u2709\ufe0f ' + escapeHtml(book.authorInfo.name || book.author) + '</div>' +
-          '<div class="detail-desc">' + escapeHtml(book.authorInfo.bio) + '</div>' +
+          '<div class="detail-desc">' + escapeHtml(sanitizeDescriptionForDisplay(book.authorInfo.bio)) + '</div>' +
           '</div>';
       }
 

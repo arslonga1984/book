@@ -2,12 +2,15 @@ import type { FastifyPluginAsync } from 'fastify'
 import { z } from 'zod'
 import { prisma } from '../db/prisma.js'
 import type { CountryCode, LanguageCode } from '@book-ranking/shared'
+import { getCachedValue, setCachedValue } from '../utils/cache.js'
+import { sanitizeDescription } from '../scrapers/utils.js'
 
 const querySchema = z.object({
   country: z.enum(['KR', 'JP', 'CN', 'US', 'UK']).optional(),
   lang: z.enum(['ko', 'en', 'zh', 'ja']).default('ko'),
   limit: z.coerce.number().min(1).max(100).default(20),
   page: z.coerce.number().min(1).default(1),
+  sort: z.enum(['updatedAt', 'rank']).default('updatedAt'),
 })
 
 const idParamSchema = z.object({
@@ -24,24 +27,50 @@ export const booksRoutes: FastifyPluginAsync = async (app) => {
       ? { country: { code: query.country } }
       : undefined
 
-    const [books, total] = await Promise.all([
-      prisma.book.findMany({
-        where,
-        include: {
-          country: true,
-          rankings: {
-            orderBy: { rankingDate: 'desc' },
-            take: 1,
-          },
-        },
-        orderBy: { updatedAt: 'desc' },
-        skip,
-        take: query.limit,
-      }),
-      prisma.book.count({ where }),
-    ])
+    const cacheKey = `books:${query.country ?? 'ALL'}:${query.lang}:${query.limit}:${query.page}:${query.sort}`
+    const cached = getCachedValue<{
+      books: Awaited<ReturnType<typeof prisma.book.findMany>>
+      total: number
+    }>(cacheKey)
 
-    const formattedBooks = books.map((book) => ({
+    const [books, total] = cached
+      ? [cached.books, cached.total]
+      : await Promise.all([
+          prisma.book.findMany({
+            where,
+            include: {
+              country: true,
+              rankings: {
+                orderBy: { rankingDate: 'desc' },
+                take: 1,
+              },
+            },
+            orderBy: { updatedAt: 'desc' },
+            skip,
+            take: query.limit,
+          }),
+          prisma.book.count({ where }),
+        ])
+
+    if (!cached) {
+      setCachedValue(cacheKey, { books, total }, 60_000)
+    }
+
+    const sortedBooks =
+      query.sort === 'rank'
+        ? [...books].sort((a, b) => {
+            const rankA = a.rankings[0]?.rank ?? Number.MAX_SAFE_INTEGER
+            const rankB = b.rankings[0]?.rank ?? Number.MAX_SAFE_INTEGER
+
+            if (rankA === rankB) {
+              return b.updatedAt.getTime() - a.updatedAt.getTime()
+            }
+
+            return rankA - rankB
+          })
+        : books
+
+    const formattedBooks = sortedBooks.map((book) => ({
       id: book.id,
       countryCode: book.country.code as CountryCode,
       isbn: book.isbn,
@@ -106,7 +135,7 @@ export const booksRoutes: FastifyPluginAsync = async (app) => {
         currency: book.currency,
         coverImageUrl: book.coverImageUrl,
         detailUrl: book.detailUrl,
-        description: getLocalizedField(book, 'description', lang),
+        description: sanitizeDescription(getLocalizedField(book, 'description', lang)) ?? null,
         category: book.category,
         rankHistory: book.rankings.map((r) => ({
           rank: r.rank,
