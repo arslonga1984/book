@@ -13,4 +13,11 @@ describe('sanitizeDescription', () => {
     const raw = '<div>첫 문장<br>둘째 문장</div><p>셋째 문장</p>'
     expect(sanitizeDescription(raw)).toBe('첫 문장\n둘째 문장\n셋째 문장')
   })
+
+  it('handles escaped html tags from meta descriptions', () => {
+    const raw = '&lt;b&gt;삶의 고비마다 힘이 되어준 말&lt;br/&gt;좋아하는 일을 하고&lt;/b&gt;&lt;br/&gt;다음 문장'
+    expect(sanitizeDescription(raw)).toBe(
+      '삶의 고비마다 힘이 되어준 말\n좋아하는 일을 하고\n다음 문장'
+    )
+  })
 })

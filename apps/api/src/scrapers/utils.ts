@@ -29,15 +29,20 @@ export function sanitizeDescription(raw: string | null | undefined): string | un
     return undefined
   }
 
-  const withLineBreaks = raw
+  // Decode first to handle escaped markup from meta fields (e.g. &lt;br/&gt;)
+  const decodedOnce = decodeHtmlEntities(raw)
+
+  // Decode twice for doubly-escaped payloads that occasionally appear in feeds
+  const decoded = decodeHtmlEntities(decodedOnce)
+
+  const withLineBreaks = decoded
     .replace(/<\s*br\s*\/?\s*>/gi, '\n')
     .replace(/<\s*\/\s*(p|div|li|h[1-6])\s*>/gi, '\n')
   const withoutTags = withLineBreaks.replace(/<[^>]+>/g, ' ')
-  const decoded = decodeHtmlEntities(withoutTags)
 
-  const normalized = decoded
+  const normalized = withoutTags
     .replace(/[\t\r ]+/g, ' ')
-    .replace(/\n[ \t]+/g, '\n')
+    .replace(/[ \t]*\n[ \t]*/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
 
