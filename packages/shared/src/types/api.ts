@@ -27,6 +27,7 @@ export interface GetBooksParams {
   lang?: LanguageCode
   limit?: number
   page?: number
+  sort?: 'updatedAt' | 'rank'
 }
 
 export interface GetBookByIdParams {

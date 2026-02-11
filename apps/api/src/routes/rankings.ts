@@ -2,6 +2,7 @@ import type { FastifyPluginAsync } from 'fastify'
 import { z } from 'zod'
 import { prisma } from '../db/prisma.js'
 import type { CountryCode, LanguageCode } from '@book-ranking/shared'
+import { getCachedValue, setCachedValue } from '../utils/cache.js'
 
 const querySchema = z.object({
   country: z.enum(['KR', 'JP', 'CN', 'US', 'UK']),
@@ -16,6 +17,30 @@ export const rankingsRoutes: FastifyPluginAsync = async (app) => {
   // GET /api/v1/rankings
   app.get('/', async (request, reply) => {
     const query = querySchema.parse(request.query)
+    const cacheKey = `rankings:${query.country}:${query.date ?? 'latest'}:${query.lang}`
+    const cachedResponse = getCachedValue<{
+      success: true
+      data: {
+        countryCode: CountryCode
+        date: string | null
+        books: Array<{
+          id: number
+          rank: number
+          rankChange: number | null
+          isNew: boolean
+          title: string
+          author: string
+          coverImageUrl: string | null
+          price: string | null
+          currency: string | null
+        }>
+        updatedAt: Date | null
+      }
+    }>(cacheKey)
+
+    if (cachedResponse) {
+      return cachedResponse
+    }
 
     const country = await prisma.country.findUnique({
       where: { code: query.country },
@@ -91,8 +116,8 @@ export const rankingsRoutes: FastifyPluginAsync = async (app) => {
       }
     })
 
-    return {
-      success: true,
+    const response = {
+      success: true as const,
       data: {
         countryCode: query.country as CountryCode,
         date: targetDate.toISOString().split('T')[0],
@@ -100,6 +125,9 @@ export const rankingsRoutes: FastifyPluginAsync = async (app) => {
         updatedAt: rankings[0]?.createdAt ?? null,
       },
     }
+
+    setCachedValue(cacheKey, response, 60_000)
+    return response
   })
 
   // GET /api/v1/rankings/history/:bookId
